@@ -1,3 +1,5 @@
+# This model is largely based on Andrej Karparthy's "makemore" videos, with some refinements to the inference method.
+
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
@@ -129,6 +131,15 @@ class GPTModel(nn.Module):
         return logits, loss
 
     def generate(self, idx, max_new_tokens, stop_tokens=None, generated=None, top_k=5, sample=True, supress_tokens=[]):
+        """ Generate a stream of tokens.
+          :param idx prompt
+          :param max_new_tokens max tokens to generate
+          :param stop_tokens immediately stop on any of these tokens
+          :param generated callback for when a new token is generated. Useful for chatbot behaviour.
+          :param top_k only sample the top n most likely tokens.
+          :param sample always choose the top most likely token if false, otherwise take based on probability.
+          :param supress_tokens choose tokens to supress, ie glitch tokens or anything that messes with your output. Try removing 'and' or 'the'.
+          :return the generated tokens."""
         for _ in range(max_new_tokens):
             idx_cond = idx[:, -block_size:]  #
             logits, loss = self(idx_cond)

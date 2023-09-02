@@ -1,10 +1,11 @@
+# A FastAPI server which mimics the python-cpp server.
+# Only implements barely enough to be usable.
+
 import asyncio
 import json
 
 import torch
-import torch.nn as nn
 import tiktoken
-from torch.nn import functional as F
 
 from model import GPTModel, get_batch, device
 
@@ -156,7 +157,7 @@ def inference():
 
 
     stops = [enc.encode(".")[0], enc.encode("?")[0], enc.encode("!")[0]]
-    prompt = "Alexander the Great was born in  "
+    prompt = "Wollongong is a large town in"
     print(f"{prompt}", end="")
     prompt_tokens = enc.encode(prompt)
     supress = torch.tensor([0, 930], dtype=torch.long, device=device) # the and and: 290, 262
