@@ -1,7 +1,13 @@
 # mygpt
 An easily-trained baby GPT that can stand in for the real thing. Based on Andrej Karpathy's makemore, but set up to mimic a llama-cpp server.
 
-The main points of differentiation are that my version is token-based (tiktoken) with code to load up multiple text files as a trining set. Plus, it has a minimal server which is a drop-in replacement for the OpenAI REST API.
+The main points of differentiation are:
+ - my version is token-based (tiktoken)
+ - code to load up multiple text files as a training set
+ - a minimal server which is a drop-in replacement for the OpenAI REST API
+ - extra inference parameters, such as top_k, and the supression of tokens which you do not want to see (ie glitch tokens or annoyingly repeated tokens).
+
+
 
 So you can train the default tiny 15M parameter model, and use that in your projects instead of ChatGPT.
 
