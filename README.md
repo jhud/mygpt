@@ -1,6 +1,11 @@
 # mygpt
 An easily-trained baby GPT that can stand in for the real thing. Based on Andrej Karpathy's makemore, but set up to mimic a llama-cpp server.
 
+The main points of differentiation are that my version is token-based (tiktoken) with code to load up multiple text files as a trining set. Plus, it has a minimal server which is a drop-in replacement for the OpenAI REST API.
+
+So you can train the default tiny 15M parameter model, and use that in your projects instead of ChatGPT.
+
+
 This is not production-ready; it's a toy implementation for educational purposes.
 
 ## Setup
@@ -21,3 +26,37 @@ Uncomment "train()" in main.py. It will save checkpoints of the model parameters
 
 Once you have trained the model, comment "train()" and uncomment "inference()". Setup whatever prompt you want. Then run the script to see the generated text appear.
 
+
+
+## Example output
+
+These are some sample responses from a model trained on a dozen old Encyclopedia Brittanica volumes for a couple of hours on an NVidia 4GB GPU, then fine-tuned on 120 dad-jokes from the internet.
+
+```
+Q: What is a dog?
+A: To get a frog.
+
+Q: Why did the chicken cross the road?
+A: Because it was Sunday.
+```
+
+With "Q: " as a prompt, it will make its own "jokes":
+
+```
+Q: How do you cross a race with no cold birds?
+A: Because they did the toothache entirely.
+
+Q: Why did a figureur hit a like?
+A: Because a joke.
+````
+
+Pure comic genius!
+
+The prompt format is:
+```
+Q: {user question}
+```
+
+Here is part of the fine-tuning set (real dad jokes from the internet - not what was generated):
+Q: What do you call a fake noodle? A: An impasta
+Q: How do you organise a space party? A: You planet!
