@@ -5,20 +5,20 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 # for victorian
-# device = "cuda" if torch.cuda.is_available() else "cpu"
-# batch_size = 64 # How many sequences in parallel - 64 saturates my 4GB CUDA card pretty well
-# block_size = 32 # context length, was 8
-# n_embd = 120 # num embedding dimensions
-# n_layer = 16
-# dropout = 0.2
+device = "cuda" if torch.cuda.is_available() else "cpu"
+batch_size = 64 # How many sequences in parallel - 64 saturates my 4GB CUDA card pretty well
+block_size = 32 # context length, was 8
+n_embd = 120 # num embedding dimensions
+n_layer = 16
+dropout = 0.2
 
 # for encyclopedias
-device = "cuda" if torch.cuda.is_available() else "cpu"
-batch_size = 36 # How many sequences in parallel - 64 saturates my 4GB CUDA card pretty well
-block_size = 64 # context length, was 8
-n_embd = 128 # num embedding dimensions
-n_layer = 20
-dropout = 0.3
+# device = "cuda" if torch.cuda.is_available() else "cpu"
+# batch_size = 36 # How many sequences in parallel - 64 saturates my 4GB CUDA card pretty well
+# block_size = 64 # context length, was 8
+# n_embd = 128 # num embedding dimensions
+# n_layer = 20
+# dropout = 0.3
 
 
 def get_batch(tokens):

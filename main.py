@@ -46,6 +46,8 @@ async def models(request: Request):
 
 @app.post("/v1/completions")
 async def completions(request: Request, body: CreateCompletionRequest):
+    """ This file can be served as a drop-in replacement for a llama-cpp server.
+    Only the minimal functionality needed to make it work is implemented. """
     global enc, m
 
     def on_generated(token):
@@ -60,6 +62,8 @@ async def completions(request: Request, body: CreateCompletionRequest):
     tokens = ret.tolist()[0]
 
     if body.stream:
+        # This is a terrible hack to do response streaming: just wait until it is done and then dribble out the tokens.
+        # Couldn't be bothered converting my model to async.
         chunks = [json.dumps({"choices": [{"text": enc.decode([token])}]}) for token in tokens]
 
         def new_messages():
@@ -86,6 +90,7 @@ async def completions(request: Request, body: CreateCompletionRequest):
         return {"resp": enc.decode(tokens)}
 
 def text_from_path(path):
+    """ Load all the text files found at this path into one huge lump of text and return it. """
     import glob
     text = ""
     for filename in glob.glob(path+"*.txt"):
@@ -96,6 +101,7 @@ def text_from_path(path):
     return text
 
 def text_from_file():
+    """ Open a single file and return its contents. """
     text = ""
     with open('data/input.txt') as f:
         lines = f.readlines()
@@ -105,7 +111,10 @@ def text_from_file():
 
 
 def train():
+    """ Train the model and save it at regular checkpoints. """
     global enc, m
+
+    # Change this path to where your training data is, as a folder full of .txt files
     text = text_from_path("data/encyclopedias/")
 
     tokens = torch.tensor(enc.encode(text), dtype=torch.long)
@@ -117,6 +126,7 @@ def train():
     m = model.to(device)
     print(sum(p.numel() for p in m.parameters()) / 1e6, "M parameters")
 
+    # Try to load the old model so we can continue training it from where we left off.
     try:
         m.load_state_dict(torch.load("models/encyclopedias.pt"))
     except FileNotFoundError:
@@ -143,13 +153,15 @@ def train():
 
 
 def inference():
+    """ Generate a stream of text from a starting prompt. """
     global m, enc
 
     model = GPTModel(enc.n_vocab)
     m = model.to(device)
 
+    # This is the model that was trained previously. The hyperparameters in model.py must match exactly to when it was trained, or there'll be an error.
     print("Loading model...")
-    m.load_state_dict(torch.load("models/encyclopedias.pt"))
+    m.load_state_dict(torch.load("models/victorian-jokes.pt"))
 
     def on_generated(token):
         #print(f"{enc.decode([token])}({token.item()})", end="")
@@ -157,19 +169,19 @@ def inference():
 
 
     stops = [enc.encode(".")[0], enc.encode("?")[0], enc.encode("!")[0]]
-    prompt = "Wollongong is a large town in"
+    prompt = "Q: Why did the chicken cross the road?\n"
     print(f"{prompt}", end="")
     prompt_tokens = enc.encode(prompt)
-    supress = torch.tensor([0, 930], dtype=torch.long, device=device) # the and and: 290, 262
+    # supress = torch.tensor([0, 930], dtype=torch.long, device=device) # the and and: 290, 262 as a testy=
+    supress = []
     idx = torch.tensor([prompt_tokens], dtype=torch.long, device=device)
-    m.generate(idx, max_new_tokens=400, stop_tokens=None, generated=on_generated, top_k=3, sample=True, supress_tokens=supress)
+    m.generate(idx, max_new_tokens=400, stop_tokens=None, generated=on_generated, top_k=16, sample=True, supress_tokens=supress)
     print("\n")
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     print(f"Using device {device}")
 
-    train()
-    #inference()
+    # Uncomment this to train the model
+    #train()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    inference()
