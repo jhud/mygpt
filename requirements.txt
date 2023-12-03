@@ -1,3 +1,9 @@
+# server
 fastapi[all]
 uvicorn[standard]
 sse-starlette
+
+# LLM
+torch
+tiktoken
+numpy
