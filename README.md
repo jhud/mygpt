@@ -66,3 +66,35 @@ Q: {user question}
 Here is part of the fine-tuning set (real dad jokes from the internet - not what was generated):
 Q: What do you call a fake noodle? A: An impasta
 Q: How do you organise a space party? A: You planet!
+
+
+## Improving the performance
+
+This code is an educational exercise; it has a self-attention head built from first principles.
+
+You can get a great memory + speed saving by replacing the self-attention head with a prebuilt module from pytorch. Replace the old Block class with this code:
+
+```
+class Block(nn.Module):
+    """ Intersperse communication (attention) and computation """
+
+    def __init__(self, n_embd, n_head):
+        super().__init__()
+        self.sa = nn.MultiheadAttention(n_embd, n_head, dropout=dropout)
+        self.ffwd = FeedForward(n_embd)
+        self.ln1 = nn.LayerNorm(n_embd)
+        self.ln2 = nn.LayerNorm(n_embd)
+
+    def forward(self, x):
+        l1_results = self.ln1(x)
+        sa_results, _ = self.sa(l1_results, l1_results, l1_results, need_weights=False)
+        x = x + sa_results  # note the x+ is a residual connection to help with optimisation
+        x = x + self.ffwd(self.ln2(x))
+        return x
+```
+
+I got a ~30% memory reduction.
+
+This is probably because many separate steps in our layers can be mathematically simplified when the layers are combined into a single module. 
+Plus, pytorch is no doubt much better optimised than our naive python implementation.
+
